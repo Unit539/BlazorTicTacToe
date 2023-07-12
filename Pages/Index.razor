@@ -1,0 +1,60 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using MyApplication.Components;
+@inject ILogger<Index> Logger;
+@inject ProtectedLocalStorage LocalStorage;
+
+
+<PageTitle>Крестики-нолики</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Крестики-нолики</MudText>
+<MudText Class="mb-8">Добро пожаловать в игру Крестики-нолики</MudText>
+
+<div>Current Time: @DateTime.Now</div>
+
+@if(_savedUserName == null)
+{
+	<div>What is your Name?</div>
+	<EditForm Model="@_model" OnValidSubmit="@HandelValidSubmit">
+		Имя:<InputText @bind-Value="_model.UserName"></InputText>
+		<input type="submit" value="Submit">
+	</EditForm>
+}else {
+	<div>Hello, @_savedUserName!</div>
+}
+
+<BoardComponent>
+
+</BoardComponent>
+
+@code{
+	private FormModel _model = new();
+	private const string userNameKey = "userName";
+	private string? _savedUserName;
+
+	private class FormModel
+	{
+		public string UserName{ get; set; }
+	}
+
+	private async Task HandelValidSubmit()
+	{
+		Logger.LogInformation("User Name: {UserName}", _model.UserName);
+		_savedUserName = _model.UserName;
+		await LocalStorage.SetAsync(userNameKey, _model.UserName);
+	}
+
+	protected override async Task OnAfterRenderAsync(bool name)
+	{
+		await base.OnAfterRenderAsync(name);
+		if (name)
+		{
+			var result = await LocalStorage.GetAsync<string>(userNameKey);
+			if (result.Success)
+			{
+				_savedUserName = result.Value;
+				StateHasChanged();
+			}
+		}
+	}
+}

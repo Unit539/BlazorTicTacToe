@@ -1,7 +1,4 @@
-﻿body {
-}
-
-.tictactoe-board {
+﻿.tictactoe-board {
     background-color: white;
     display: flex;
     flex-direction: row;
@@ -21,12 +18,12 @@
 }
 
 .tictactoe-cell-X {
-    background-image: url("/images/letter-x.png");
+    background-image: url("../images/letter-x.png");
     background-repeat: no-repeat;
 }
 
 .tictactoe-cell-O {
-    background-image: url("/images/letter-o.png");
+    background-image: url("../images/letter-o.png");
     background-repeat: no-repeat;
 }
 

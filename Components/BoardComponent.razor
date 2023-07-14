@@ -1,32 +1,20 @@
 ﻿<div class="tictactoe-board">
-    <div class="tictacttoe-column">
-        @{
-            var style = $"tictactoe-cell-{board.Cell_0_0}";
-            <div class="tictactoe-cell @style"></div>
-        }
-         <div class="tictactoe-cell
-                         tictactoe-@board.Cell_0_1.ToString()"/>
-          <div class="tictactoe-cell
-                         tictactoe-@board.Cell_0_2.ToString()"/>
-    </div>
-    <div class="tictacttoe-column">
-        <div class="tictactoe-cell
-                         tictactoe-@board.Cell_1_0.ToString()"/>
-         <div class="tictactoe-cell
-                         tictactoe-@board.Cell_1_1.ToString()"/>
-          <div class="tictactoe-cell
-                         tictactoe-@board.Cell_1_2.ToString()"/>
-    </div>
-    <div class="tictacttoe-column">
-        <div class="tictactoe-cell
-                         tictactoe-@board.Cell_2_0.ToString()"/>
-         <div class="tictactoe-cell
-                         tictactoe-@board.Cell_2_1.ToString()"/>
-          <div class="tictactoe-cell
-                         tictactoe-@board.Cell_2_2.ToString()"/>
-    </div>
+    @for(int row = 0; row < board.RowCount; row++)
+    {
+        <div class="tictacttoe-column">
+            @for (int column = 0; column < board.ColumnCount; column++)
+            {
+                CellState cell = board.Cells[row, column];
+                var savedRow = row;
+                var savedColumn = column;
+                <div class="tictactoe-cell
+                            tictactoe-cell-@cell.ToString()" @onclick="() => board.CellClick(savedRow, savedColumn)"/>
+            }
+        </div>
+    }
 </div>
 
 @code {
     Board board = new Board();
+
 }

@@ -8,13 +8,20 @@
                 var savedRow = row;
                 var savedColumn = column;
                 <div class="tictactoe-cell
-                            tictactoe-cell-@cell.ToString()" @onclick="() => board.CellClick(savedRow, savedColumn)"/>
+                            tictactoe-cell-@cell.ToString()" @onclick="() => CellClick(savedRow, savedColumn)"
+                           />
             }
         </div>
     }
 </div>
+<div>Winner: @board.GetGameResult()</div>
+
 
 @code {
     Board board = new Board();
 
+    public void CellClick(int row, int column)
+    {
+        board.CellClickWithTurn(row, column);
+    }
 }

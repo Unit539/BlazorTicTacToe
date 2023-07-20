@@ -12,7 +12,7 @@
                 bool isWin = winCells.Contains(new CellPosition(row, column));
                 <div class="tictactoe-cell
                             tictactoe-cell-@cell.ToString()" @onclick="() => CellClick(savedRow, savedColumn)">
-                      <div style="color: green; font-size: 40px; text-align: center">@(isWin? "✔" : "")</div>
+                    <div style="font-size: 40px; text-align: center">@(isWin ? "✅" : "")</div>
                 </div>
             }
         </div>

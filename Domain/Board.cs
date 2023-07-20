@@ -44,6 +44,10 @@
             {
                 return GameResult.WonO;
             }
+            else if (IsDraw())
+            {
+                return GameResult.Draw;
+            }
             else
             {
                 return GameResult.Unknown;
@@ -105,6 +109,21 @@
 
             winCells = new CellPosition[0];
             return false;
+        }
+
+        public bool IsDraw()
+        {
+            int CellsBlank = 0;
+
+            for(int j = 0; j < ColumnCount; j++)
+            {
+                for(int i = 0; i < RowCount; i++)
+                {
+                    CellsBlank = Cells[i, j] == CellState.Blank ? CellsBlank + 1 : CellsBlank;
+                }
+            }
+
+            return CellsBlank == 0;
         }
     }
 

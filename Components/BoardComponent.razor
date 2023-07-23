@@ -19,13 +19,25 @@
     }
 </div>
 
+<br/>
+<MudButton Variant="Variant.Filled" OnClick="Message" Color="Color.Error">Result</MudButton>
 
 @code {
+    [Inject] private IDialogService dialogService { get; set; }
     CellPosition[] winCells = new CellPosition[0];
     Board board = new Board();
 
     public void CellClick(int row, int column)
     {
         board.CellClickWithTurn(row, column);
+    }
+
+    public async void Message()
+    {
+        bool? result = await dialogService.ShowMessageBox(
+              "Winner",
+              $"{board.GetGameResult(out winCells)}",
+              yesText: "Ok");
+        StateHasChanged();
     }
 }

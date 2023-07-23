@@ -1,4 +1,7 @@
-﻿namespace MyApplication.Domain
+﻿using OpenAI.ChatGpt;
+using OpenAI.ChatGpt.Modules.StructuredResponse;
+
+namespace MyApplication.Domain
 {
     public class Board
     {
@@ -11,12 +14,12 @@
 		{
             Cells = new CellState[RowCount, ColumnCount];
 		}
-        
-        public CellState CurrentTurn = CellState.X;
 
-        public void SwitchTurn()
+        public Gamer CurrentGamer { get; set; } = Gamer.X;
+
+        private void SwitchGamer()
         {
-            CurrentTurn = CurrentTurn == CellState.X ? CellState.O : CellState.X;
+            CurrentGamer = CurrentGamer == Gamer.X ? Gamer.O : Gamer.X;
         }
 
         public void CellClickWithTurn(int row, int column)
@@ -26,9 +29,16 @@
             {
                 if (Cells[row, column] == CellState.Blank)
                 {
-                    Cells[row, column] = CurrentTurn;
-
-                    SwitchTurn();
+                    if (CurrentGamer == Gamer.X)
+                    {
+                        Cells[row, column] = CellState.X;
+                        SwitchGamer();
+                    }
+                    else
+                    {
+                        Cells[row, column] = CellState.O;
+                        SwitchGamer();
+                    }
                 }
             }
             
@@ -55,7 +65,8 @@
         }
 
         public bool CheckWin(Gamer gamer, out CellPosition[] winCells)
-        {
+        {   
+            int i, j;
             CellState expectedCell;
 
             if (gamer == Gamer.X)
@@ -63,10 +74,10 @@
             else
                 expectedCell = CellState.O;
 
-            for(int i = 0; i < RowCount; i++)
+            for(i = 0; i < RowCount; i++)
             {
                 var count = 0;
-                for(int j = 0; j < ColumnCount; j++)
+                for(j = 0; j < ColumnCount; j++)
                 {
                     if(Cells[i, j] == expectedCell)
                     {
@@ -85,10 +96,10 @@
                 }
             }
 
-            for (int j = 0; j < ColumnCount; j++)
+            for (j = 0; j < ColumnCount; j++)
             {
                 var count = 0;
-                for (int i = 0; i < RowCount; i++)
+                for (i = 0; i < RowCount; i++)
                 {
                     if (Cells[i, j] == expectedCell)
                     {
@@ -101,7 +112,45 @@
                     {
                         new CellPosition(row: 0, column: j),
                         new CellPosition(row: 1, column: j),
-                        new CellPosition(row: 2, column: j)
+                        new CellPosition(row: 2, column: j),
+                    };
+                    return true;
+                }
+            }
+
+            var countDL = 0;
+            for (i = 0, j = 0; i < RowCount && j < ColumnCount; i++, j++)
+            {
+                if (Cells[i, j] == expectedCell)
+                {
+                    countDL++;
+                }
+                if(countDL == 3)
+                {
+                    winCells = new CellPosition[]
+                    {
+                        new CellPosition(row: 0, column: 0),
+                        new CellPosition(row: 1, column: 1),
+                        new CellPosition(row: 2, column: 2),
+                    };
+                    return true;
+                }
+            }
+
+            var countDR = 0;
+            for (i = 0, j = ColumnCount - 1; i < RowCount && j >= 0; i++, j--)
+            {
+                if(Cells[i, j] == expectedCell)
+                {
+                    countDR++;
+                }
+                if(countDR == 3)
+                {
+                    winCells = new CellPosition[]
+                    {
+                        new CellPosition(row: 0, column: 2),
+                        new CellPosition(row: 1, column: 1),
+                        new CellPosition(row: 2, column: 0),
                     };
                     return true;
                 }
@@ -124,6 +173,22 @@
             }
 
             return CellsBlank == 0;
+        }
+
+        public void MakeTurnByChatGpt()
+        {
+            var client = new OpenAiClient("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");
+            var board = $"{Cells[0, 0]} {Cells[0, 1]} {Cells[0, 2]}" +
+                        $"{Cells[1, 0]} {Cells[1, 1]} {Cells[1, 2]}" +
+                        $"{Cells[2, 0]} {Cells[2, 1]} {Cells[2, 2]}";
+            var prompt = "You are an AI playing a game of Tic Tac Toe as the 'O' player. Your goal is to place three of your marks in a horizontal, vertical, or diagonal row to win the game. The game starts with the 'X' player making the first move. Players alternate turns, placing their mark in an empty square. You are highly skilled and strive to play the optimal move. Each square on the game board can be identified by its row (from top to bottom) and column (from left to right), both ranging from 0 to 2. The current state of the board is represented by a 3x3 grid. 'X' represents the opponent's pieces, 'O' represents your own pieces, and '_' represents an empty space. Here's the current state of the game:\n"
+                         + board
+                         + "\nReading from left to right, the columns are 0, 1, and 2, and reading from top to bottom, the rows are 0, 1, and 2.It's your turn to play as the 'O' player. Please specify your move as a row and column number. What is your next move?";
+
+            var dialog = Dialog.StartAsSystem(prompt);
+            var nextTurn = client.GetStructuredResponse<CellPosition>(dialog).Result;
+
+            CellClickWithTurn(nextTurn.row, nextTurn.column);
         }
     }
 
